@@ -25,4 +25,4 @@ v2 = (np.sqrt(M + 1) * fft(Q) / (l * (1 + r * dt))) ** M
 C_0 = fft(v1 * v2) / l
 
 # Result Output
-print "Value of European call option is %8.3f" % np.real(C_0[0])
+print("Value of European call option is %8.3f" % np.real(C_0[0]))

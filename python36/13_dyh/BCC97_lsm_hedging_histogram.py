@@ -19,6 +19,7 @@ dis = 0.05  # change of S[t] in percent to estimate derivative
 dt = T / M
 np.random.seed(50000)
 
+
 def BCC97_hedge_simulation(M=50, I=10000):
     ''' Monte Carlo simualtion of dynamic hedging paths
     for American put option in BSM model. '''
@@ -33,7 +34,8 @@ def BCC97_hedge_simulation(M=50, I=10000):
     # 'data basis' for delta hedging
     V_2 = BCC97_lsm_put_value(S0 - a * ds, K, T, M, I)[0]
     delt[0] = (V_1 - V_2) / (2 * ds)
-    V0LSM = BCC97_lsm_put_value(S0, K, T, M, I)[0]  # initial option value for S0
+    # initial option value for S0
+    V0LSM = BCC97_lsm_put_value(S0, K, T, M, I)[0]
     po[0] = V0LSM  # initial portfolio values
 
     #
@@ -63,7 +65,7 @@ def BCC97_hedge_simulation(M=50, I=10000):
                                 v[t, p],
                                 r[t, p],
                                 1]
-                        # state vector for S[t, p] + (2.0 - a) * ds
+                    # state vector for S[t, p] + (2.0 - a) * ds
                     stateV_A.reverse()
                     V0A = max(0, np.dot(rg[t], stateV_A))
                     # revaluation via regression
@@ -79,7 +81,7 @@ def BCC97_hedge_simulation(M=50, I=10000):
                                 v[t, p],
                                 r[t, p],
                                 1]
-                        # state vector for S[t, p] - a * ds
+                    # state vector for S[t, p] - a * ds
                     stateV_B.reverse()
                     V0B = max(0, np.dot(rg[t], stateV_B))
                     # revaluation via regression
@@ -94,22 +96,22 @@ def BCC97_hedge_simulation(M=50, I=10000):
         alpha_t = [kappa_r, theta_r, sigma_r, r0, 0.0, t * dt]
         pl = (po[t] - h[t, p]) * B(alpha_t)
         if run % 1000 == 0:
-            print "run %5d   p/l %8.3f" % (run, pl)
+            print("run %5d   p/l %8.3f" % (run, pl))
         pl_list.append(pl)
     pl_list = np.array(pl_list)
 
     #
     # Results Output
     #
-    print "\nSUMMARY STATISTICS FOR P&L"
-    print "---------------------------------"
-    print "Dynamic Replications %12d" % runs
-    print "Time Steps           %12d" % M
-    print "Paths for Valuation  %12d" % I
-    print "Maximum              %12.3f" % max(pl_list)
-    print "Average              %12.3f" % np.mean(pl_list)
-    print "Median               %12.3f" % np.median(pl_list)
-    print "Minimum              %12.3f" % min(pl_list)
-    print "---------------------------------"
+    print("\nSUMMARY STATISTICS FOR P&L")
+    print("---------------------------------")
+    print("Dynamic Replications %12d" % runs)
+    print("Time Steps           %12d" % M)
+    print("Paths for Valuation  %12d" % I)
+    print("Maximum              %12.3f" % max(pl_list))
+    print("Average              %12.3f" % np.mean(pl_list))
+    print("Median               %12.3f" % np.median(pl_list))
+    print("Minimum              %12.3f" % min(pl_list))
+    print("---------------------------------")
 
     return pl_list

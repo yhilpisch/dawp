@@ -8,12 +8,10 @@
 #
 import math
 import numpy as np
-import warnings
-warnings.simplefilter('ignore')
 import matplotlib as mpl
-mpl.rcParams['font.family'] = 'serif'
 import matplotlib.pyplot as plt
 
+mpl.rcParams['font.family'] = 'serif'
 #
 # Parameters
 #
@@ -62,15 +60,15 @@ def BSM_lsm_put_value(S0, M, I):
     df = math.exp(-r * dt)  # discount factor
     S = np.zeros((M + 1, I), dtype=np.float)  # stock price matrix
     S[0] = S0  # initial values
-    for t in xrange(1, M + 1, 1):  # stock price at t
-        S[t] = S[t - 1] * (np.exp((r - sigma ** 2 / 2) * dt
-                            + sigma * math.sqrt(dt) * rand[t]))
+    for t in range(1, M + 1, 1):  # stock price at t
+        S[t] = S[t - 1] * (np.exp((r - sigma ** 2 / 2) * dt +
+                                  sigma * math.sqrt(dt) * rand[t]))
     h = np.maximum(K - S, 0)  # inner values
     V = np.maximum(K - S, 0)  # value matrix
     ex = np.zeros((M + 1, I), dtype=np.float)   # exercise matrix
     C = np.zeros((M + 1, I), dtype=np.float)   # continuation value matrix
     rg = np.zeros((M + 1, D + 1), dtype=np.float)
-      # matrix for reg. coefficients
+    # matrix for reg. coefficients
     for t in range(M - 1, 0, -1):
         rg[t] = np.polyfit(S[t], V[t + 1] * df, D)
         # regression in step i
@@ -79,11 +77,12 @@ def BSM_lsm_put_value(S0, M, I):
         C[t] = np.where(C[t] < 0, 0., C[t])
         # correction for neg C
         V[t] = np.where(h[t] >= C[t],
-                      h[t], V[t + 1] * df)  # exercise decision
+                        h[t], V[t + 1] * df)  # exercise decision
         ex[t] = np.where(h[t] >= C[t], 1, 0)
         # exercise decision (yes=1)
     V0 = np.sum(V[1]) / I * df
     return V0, S, ex, rg, h, dt
+
 
 def BSM_hedge_run(p=0):
     ''' Implements delta hedging for a single path. '''
@@ -101,53 +100,55 @@ def BSM_hedge_run(p=0):
     #
     delt = np.zeros(M + 1, dtype=np.float)  # vector for deltas
     print
-    print "APPROXIMATION OF FIRST ORDER "
-    print "-----------------------------"
-    print " %7s | %7s | %7s " % ('step', 'S_t', 'Delta')
-    for t in xrange(1, M, 1):
+    print("APPROXIMATION OF FIRST ORDER ")
+    print("-----------------------------")
+    print(" %7s | %7s | %7s " % ('step', 'S_t', 'Delta'))
+    for t in range(1, M, 1):
         if ex[t, p] == 0:  # if option is alive
             St = S[t, p]  # relevant index level
             diff = (np.polyval(rg[t], St + ds) -
                     np.polyval(rg[t], St))
-                    # numerator of difference quotient
+            # numerator of difference quotient
             delt[t] = diff / ds  # delta as difference quotient
-            print " %7d | %7.2f | %7.2f" % (t, St, delt[t])
+            print(" %7d | %7.2f | %7.2f" % (t, St, delt[t]))
             if (S[t, p] - S[t - 1, p]) * (delt[t] - delt[t - 1]) < 0:
-                print "          wrong"
+                print("          wrong")
         else:
             break
 
     delt[0] = del_0
-    print
-    print "DYNAMIC HEDGING OF AMERICAN PUT (BSM)"
-    print "---------------------------------------"
+    print()
+    print("DYNAMIC HEDGING OF AMERICAN PUT (BSM)")
+    print("---------------------------------------")
     po = np.zeros(t, dtype=np.float)  # vector for portfolio values
     vt = np.zeros(t, dtype=np.float)  # vector for option values
     vt[0] = V_1
     po[0] = V_1
     bo = V_1 - delt[0] * S0  # bond position value
-    print "Initial Hedge"
-    print "Stocks             %8.3f" % delt[0]
-    print "Bonds              %8.3f" % bo
-    print "Cost               %8.3f" % (delt[0] * S0 + bo)
+    print("Initial Hedge")
+    print("Stocks             %8.3f" % delt[0])
+    print("Bonds              %8.3f" % bo)
+    print("Cost               %8.3f" % (delt[0] * S0 + bo))
 
-    print
-    print "Regular Rehedges "
-    print 68 * "-"
-    print "step|" + 7 * " %7s|" % ('S_t', 'Port', 'Put',
-                          'Diff', 'Stock', 'Bond', 'Cost')
+    print()
+    print("Regular Rehedges ")
+    print(68 * "-")
+    print("step|" + 7 * " %7s|" % ('S_t', 'Port', 'Put',
+                                   'Diff', 'Stock', 'Bond', 'Cost'))
     for j in range(1, t, 1):
         vt[j] = BSM_lsm_put_value(S[j, p], M - j, I)[0]
         po[j] = delt[j - 1] * S[j, p] + bo * math.exp(r * dt)
         bo = po[j] - delt[j] * S[j, p]  # bond position value
-        print "%4d|" % j + 7 * " %7.3f|" % (S[j, p], po[j], vt[j],
-                        (po[j] - vt[j]), delt[j], bo, delt[j] * S[j, p] + bo)
+        print("%4d|" % j + 7 * " %7.3f|" % (S[j, p], po[j], vt[j],
+                                            (po[j] - vt[j]), delt[j],
+                                            bo, delt[j] * S[j, p] + bo))
 
     errs = po - vt  # hedge errors
-    print "MSE             %7.3f" % (np.sum(errs ** 2) / len(errs))
-    print "Average Error   %7.3f" % (np.sum(errs) / len(errs))
-    print "Total P&L       %7.3f" % np.sum(errs)
+    print("MSE             %7.3f" % (np.sum(errs ** 2) / len(errs)))
+    print("Average Error   %7.3f" % (np.sum(errs) / len(errs)))
+    print("Total P&L       %7.3f" % np.sum(errs))
     return S[:, p], po, vt, errs, t
+
 
 def plot_hedge_path(S, po, vt, errs, t):
     #
@@ -156,7 +157,6 @@ def plot_hedge_path(S, po, vt, errs, t):
     tl = np.arange(t)
     plt.figure(figsize=(8, 6))
     plt.subplot(311)
-    plt.grid(True)
     plt.plot(tl, S[tl], 'r')
     plt.ylabel('index level')
     plt.subplot(312)
@@ -167,7 +167,6 @@ def plot_hedge_path(S, po, vt, errs, t):
     plt.legend(loc=0)
     ax = plt.axis()
     plt.subplot(313)
-    plt.grid(True)
     wi = 0.3
     diffs = po[tl] - vt[tl]
     plt.bar(tl - wi / 2, diffs, color='b', width=wi)

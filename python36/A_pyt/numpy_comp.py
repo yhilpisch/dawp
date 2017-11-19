@@ -4,8 +4,8 @@
 # Array Initialization for Inner Values
 iv = np.zeros((M + 1, M + 1), dtype=np.float)
 z = 0
-for j in xrange(0, M + 1, 1):
-    for i in xrange(z + 1):
+for j in range(0, M + 1, 1):
+    for i in range(z + 1):
         iv[i, j] = max(S[i, j] - K, 0)
     z += 1
 

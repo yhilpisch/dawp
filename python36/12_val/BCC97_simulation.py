@@ -6,20 +6,20 @@
 # Derivatives Analytics with Python
 #
 import sys
-sys.path.append('11_cal')
 import math
 import numpy as np
 import matplotlib as mpl
-mpl.rcParams['font.family'] = 'serif'
 import matplotlib.pyplot as plt
+sys.path.append('11_cal')
 from H93_calibration import S0, kappa_r, theta_r, sigma_r, r0
 
+mpl.rcParams['font.family'] = 'serif'
 #
 # Model Parameters
 #
 opt = np.load('11_cal/opt_full.npy')
 kappa_v, theta_v, sigma_v, rho, v0, lamb, mu, delta = opt
-        
+
 
 #
 # Simulation Parameters
@@ -58,6 +58,7 @@ def generate_cholesky(rho):
     cho_matrix = np.linalg.cholesky(covariance)
     return cho_matrix
 
+
 def random_number_generator(M, I, anti_paths, moment_matching):
     ''' Function to generate pseudo-random numbers.
 
@@ -78,7 +79,7 @@ def random_number_generator(M, I, anti_paths, moment_matching):
         random number array
     '''
     if anti_paths:
-        rand = np.random.standard_normal((4, M + 1, I / 2))
+        rand = np.random.standard_normal((4, M + 1, int(I / 2)))
         rand = np.concatenate((rand, -rand), 2)
     else:
         rand = np.random.standard_normal((4, M + 1, I))
@@ -91,6 +92,7 @@ def random_number_generator(M, I, anti_paths, moment_matching):
 #
 # Function for Short Rate and Volatility Processes
 #
+
 
 def SRD_generate_paths(x0, kappa, theta, sigma, T, M, I,
                        rand, row, cho_matrix):
@@ -131,8 +133,8 @@ def SRD_generate_paths(x0, kappa, theta, sigma, T, M, I,
     for t in range(1, M + 1):
         ran = np.dot(cho_matrix, rand[:, t])
         xh[t] = (xh[t - 1] + kappa * (theta -
-             np.maximum(0, xh[t - 1])) * dt +
-             np.sqrt(np.maximum(0, xh[t - 1])) * sigma * ran[row] * sdt)
+                                      np.maximum(0, xh[t - 1])) * dt +
+                 np.sqrt(np.maximum(0, xh[t - 1])) * sigma * ran[row] * sdt)
         x[t] = np.maximum(0, xh[t])
     return x
 
@@ -140,10 +142,11 @@ def SRD_generate_paths(x0, kappa, theta, sigma, T, M, I,
 # Function for B96 Index Process
 #
 
+
 def B96_generate_paths(S0, r, v, lamb, mu, delta, rand, row1, row2,
                        cho_matrix, T, M, I, moment_matching):
     ''' Simulation of Bates (1996) index process.
-    
+
     Parameters
     ==========
     S0: float
@@ -183,16 +186,16 @@ def B96_generate_paths(S0, r, v, lamb, mu, delta, rand, row1, row2,
     dt = T / M
     sdt = math.sqrt(dt)
     ranp = np.random.poisson(lamb * dt, (M + 1, I))
-    rj = lamb * (math.exp(mu + 0.5 * delta ** 2) - 1)
     bias = 0.0
-    for t in xrange(1, M + 1, 1):
+    for t in range(1, M + 1, 1):
         ran = np.dot(cho_matrix, rand[:, t, :])
         if moment_matching:
             bias = np.mean(np.sqrt(v[t]) * ran[row1] * sdt)
-        S[t] = S[t - 1] * (np.exp(((r[t] + r[t -1]) / 2 - 0.5 * v[t]) * dt +
-                np.sqrt(v[t]) * ran[row1] * sdt - bias)
-                + (np.exp(mu + delta * ran[row2]) - 1) * ranp[t])
+        S[t] = S[t - 1] * (np.exp(((r[t] + r[t - 1]) / 2 - 0.5 * v[t]) * dt +
+                                  np.sqrt(v[t]) * ran[row1] * sdt - bias) +
+                           (np.exp(mu + delta * ran[row2]) - 1) * ranp[t])
     return S
+
 
 if __name__ == '__main__':
     #
@@ -201,41 +204,40 @@ if __name__ == '__main__':
     cho_matrix = generate_cholesky(rho)
     rand = random_number_generator(M, I, anti_paths, moment_matching)
     r = SRD_generate_paths(r0, kappa_r, theta_r, sigma_r, T, M, I,
-                            rand, 0, cho_matrix)
+                           rand, 0, cho_matrix)
     v = SRD_generate_paths(v0, kappa_v, theta_v, sigma_v, T, M, I,
-                            rand, 2, cho_matrix)
+                           rand, 2, cho_matrix)
     S = B96_generate_paths(S0, r, v, lamb, mu, delta, rand, 1, 3,
-                            cho_matrix, T, M, I, moment_matching)
+                           cho_matrix, T, M, I, moment_matching)
 
 
 def plot_rate_paths(r):
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(10, 6))
     plt.plot(r[:, :10])
     plt.xlabel('time step')
     plt.ylabel('short rate level')
     plt.title('Short Rate Simulated Paths')
-    plt.grid()
+
 
 def plot_volatility_paths(v):
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(10, 6))
     plt.plot(np.sqrt(v[:, :10]))
     plt.xlabel('time step')
     plt.ylabel('volatility level')
     plt.title('Volatility Simulated Paths')
-    plt.grid()
+
 
 def plot_index_paths(S):
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(10, 6))
     plt.plot(S[:, :10])
     plt.xlabel('time step')
     plt.ylabel('index level')
     plt.title('EURO STOXX 50 Simulated Paths')
-    plt.grid()
+
 
 def plot_index_histogram(S):
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(10, 6))
     plt.hist(S[-1], bins=30)
     plt.xlabel('index level')
     plt.ylabel('frequency')
     plt.title('EURO STOXX 50 Values after 1 Year')
-    plt.grid()

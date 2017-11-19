@@ -20,5 +20,5 @@ f_a = f(a)
 f_b = f(b)
 
 # Output
-print "f(a) = %6.3f" % f_a
-print "f(b) = %6.3f" % f_b
+print("f(a) = %6.3f" % f_a)
+print("f(b) = %6.3f" % f_b)

@@ -23,4 +23,3 @@ plt.plot(x, g1y, 'mx', label='constant')  # plot regression function values
 plt.plot(x, g2y, 'bo', label='linear')
 plt.plot(x, g3y, 'g>', label='quadratic')
 plt.legend(loc=0)
-plt.grid(True)

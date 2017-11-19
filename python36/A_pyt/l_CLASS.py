@@ -9,7 +9,7 @@ import scipy.stats as scs
 # Class Definitions
 
 
-class Option:
+class Option(object):
     ''' Black-Scholes-Merton European call option class.
 
     Attributes
@@ -37,17 +37,17 @@ class Option:
     def d1(self):
         ''' Helper function. '''
         d1 = ((math.log(self.S0 / self.K) +
-              (self.r + 0.5 * self.vola ** 2) * self.T)
-            / (self.vola * math.sqrt(self.T)))
+               (self.r + 0.5 * self.vola ** 2) * self.T) /
+              (self.vola * math.sqrt(self.T)))
         return d1
 
     def value(self):
         ''' Method to value option. '''
         d1 = self.d1()
         d2 = d1 - self.vola * math.sqrt(self.T)
-        call_value = (self.S0 * scs.norm.cdf(d1, 0.0, 1.0)
-                    - self.K * math.exp(-self.r * self.T)
-                    * scs.norm.cdf(d2, 0.0, 1.0))
+        call_value = (self.S0 * scs.norm.cdf(d1, 0.0, 1.0) -
+                      self.K * math.exp(-self.r * self.T) *
+                      scs.norm.cdf(d2, 0.0, 1.0))
         return call_value
 
 
