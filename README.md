@@ -47,9 +47,9 @@ Check out also our **Python for Algorithmic Trading Certificate Program** under 
 
 © Dr. Yves J. Hilpisch \| The Python Quants GmbH
 
-The Python Quant Platform and all codes/Jupyter notebooks come with no representations or warranties, to the extent permitted by applicable law.
+The Quant Platform (http://pqp.io) and all codes/Jupyter notebooks come with no representations or warranties, to the extent permitted by applicable law.
 
-http://tpq.io \| pff@tpq.io \|
+http://tpq.io \| dawp@tpq.io \|
 http://twitter.com/dyjh
 
 **Quant Platform** \| http://wiley.quant-platform.com
